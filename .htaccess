@@ -1,0 +1,12 @@
+Options -Indexes
+
+RewriteEngine On
+
+# Archivos estaticos pasan directos
+RewriteRule \.(css|js|png|jpg|jpeg|gif|ico|woff|woff2|ttf|svg)$ - [L,NC]
+
+# Peticiones a public/ pasan directas
+RewriteRule ^public/ - [L]
+
+# Todo lo demas va a public/index.php
+RewriteRule ^ public/index.php [L]
