@@ -48,6 +48,223 @@ function getLoggedUser(): array
 }
 
 // ── Routing ───────────────────────────────────────────────────────────────────
+
+// ==================== FUNCIONES HELPER PARA RESERVAS ====================
+
+/**
+ * @return array<string, string>
+ */
+function getCreateReservaFormData(): array
+{
+    return [
+        'fecha' => isset($_POST['fecha']) ? trim((string) $_POST['fecha']) : date('Y-m-d'),
+        'hotel' => isset($_POST['hotel']) ? trim((string) $_POST['hotel']) : '',
+        'huesped' => isset($_POST['huesped']) ? trim((string) $_POST['huesped']) : '',
+        'fecha_inicio' => isset($_POST['fecha_inicio']) ? trim((string) $_POST['fecha_inicio']) : '',
+        'fecha_fin' => isset($_POST['fecha_fin']) ? trim((string) $_POST['fecha_fin']) : '',
+        'valor' => isset($_POST['valor']) ? trim((string) $_POST['valor']) : '',
+        'habitacion' => isset($_POST['habitacion']) ? trim((string) $_POST['habitacion']) : '',
+        'num_acompanantes' => isset($_POST['num_acompanantes']) ? trim((string) $_POST['num_acompanantes']) : '0',
+        'pais' => isset($_POST['pais']) ? trim((string) $_POST['pais']) : '',
+        'departamento' => isset($_POST['departamento']) ? trim((string) $_POST['departamento']) : '',
+        'ciudad' => isset($_POST['ciudad']) ? trim((string) $_POST['ciudad']) : '',
+        'hora_checkin' => isset($_POST['hora_checkin']) ? trim((string) $_POST['hora_checkin']) : '15:00',
+        'hora_checkout' => isset($_POST['hora_checkout']) ? trim((string) $_POST['hora_checkout']) : '12:00',
+        'empleado_atiende' => isset($_POST['empleado_atiende']) ? trim((string) $_POST['empleado_atiende']) : '',
+        'empleado_despide' => isset($_POST['empleado_despide']) ? trim((string) $_POST['empleado_despide']) : '',
+        'descripcion' => isset($_POST['descripcion']) ? trim((string) $_POST['descripcion']) : '',
+    ];
+}
+
+/**
+ * @return array<string, string>
+ */
+function getUpdateReservaFormData(): array
+{
+    return [
+        'id' => isset($_POST['id']) ? trim((string) $_POST['id']) : '',
+        'fecha' => isset($_POST['fecha']) ? trim((string) $_POST['fecha']) : '',
+        'hotel' => isset($_POST['hotel']) ? trim((string) $_POST['hotel']) : '',
+        'huesped' => isset($_POST['huesped']) ? trim((string) $_POST['huesped']) : '',
+        'fecha_inicio' => isset($_POST['fecha_inicio']) ? trim((string) $_POST['fecha_inicio']) : '',
+        'fecha_fin' => isset($_POST['fecha_fin']) ? trim((string) $_POST['fecha_fin']) : '',
+        'valor' => isset($_POST['valor']) ? trim((string) $_POST['valor']) : '',
+        'habitacion' => isset($_POST['habitacion']) ? trim((string) $_POST['habitacion']) : '',
+        'num_acompanantes' => isset($_POST['num_acompanantes']) ? trim((string) $_POST['num_acompanantes']) : '0',
+        'pais' => isset($_POST['pais']) ? trim((string) $_POST['pais']) : '',
+        'departamento' => isset($_POST['departamento']) ? trim((string) $_POST['departamento']) : '',
+        'ciudad' => isset($_POST['ciudad']) ? trim((string) $_POST['ciudad']) : '',
+        'hora_checkin' => isset($_POST['hora_checkin']) ? trim((string) $_POST['hora_checkin']) : '',
+        'hora_checkout' => isset($_POST['hora_checkout']) ? trim((string) $_POST['hora_checkout']) : '',
+        'empleado_atiende' => isset($_POST['empleado_atiende']) ? trim((string) $_POST['empleado_atiende']) : '',
+        'empleado_despide' => isset($_POST['empleado_despide']) ? trim((string) $_POST['empleado_despide']) : '',
+        'descripcion' => isset($_POST['descripcion']) ? trim((string) $_POST['descripcion']) : '',
+        'estado' => isset($_POST['estado']) ? trim((string) $_POST['estado']) : '',
+    ];
+}
+
+/**
+ * @param array<string, string> $form
+ * @return array<string, string>
+ */
+function validateCreateReservaForm(array $form): array
+{
+    $errors = [];
+
+    if ($form['fecha'] === '') {
+        $errors['fecha'] = 'La fecha de reserva es obligatoria.';
+    }
+    if ($form['hotel'] === '') {
+        $errors['hotel'] = 'El nombre del hotel es obligatorio.';
+    } elseif (strlen($form['hotel']) < 3) {
+        $errors['hotel'] = 'El nombre del hotel debe tener al menos 3 caracteres.';
+    }
+    if ($form['huesped'] === '') {
+        $errors['huesped'] = 'El nombre del huésped es obligatorio.';
+    }
+    if ($form['fecha_inicio'] === '') {
+        $errors['fecha_inicio'] = 'La fecha de check-in es obligatoria.';
+    }
+    if ($form['fecha_fin'] === '') {
+        $errors['fecha_fin'] = 'La fecha de check-out es obligatoria.';
+    }
+    if ($form['fecha_inicio'] !== '' && $form['fecha_fin'] !== '') {
+        if ($form['fecha_inicio'] > $form['fecha_fin']) {
+            $errors['fecha_fin'] = 'La fecha de check-out debe ser posterior al check-in.';
+        }
+    }
+    if ($form['valor'] === '') {
+        $errors['valor'] = 'El valor de la reserva es obligatorio.';
+    } elseif (!is_numeric($form['valor']) || (float) $form['valor'] <= 0) {
+        $errors['valor'] = 'El valor debe ser un número mayor a 0.';
+    }
+    if ($form['hora_checkin'] === '') {
+        $errors['hora_checkin'] = 'La hora de check-in es obligatoria.';
+    }
+    if ($form['hora_checkout'] === '') {
+        $errors['hora_checkout'] = 'La hora de check-out es obligatoria.';
+    }
+    if ($form['empleado_atiende'] === '') {
+        $errors['empleado_atiende'] = 'El empleado que atiende es obligatorio.';
+    }
+    if ($form['empleado_despide'] === '') {
+        $errors['empleado_despide'] = 'El empleado que despide es obligatorio.';
+    }
+    if ($form['num_acompanantes'] !== '' && (!is_numeric($form['num_acompanantes']) || (int) $form['num_acompanantes'] < 0)) {
+        $errors['num_acompanantes'] = 'El número de acompañantes debe ser 0 o mayor.';
+    }
+
+    return $errors;
+}
+
+/**
+ * @param array<string, string> $form
+ * @return array<string, string>
+ */
+function validateUpdateReservaForm(array $form): array
+{
+    $errors = [];
+
+    if ($form['fecha'] === '') {
+        $errors['fecha'] = 'La fecha de reserva es obligatoria.';
+    }
+    if ($form['hotel'] === '') {
+        $errors['hotel'] = 'El nombre del hotel es obligatorio.';
+    }
+    if ($form['huesped'] === '') {
+        $errors['huesped'] = 'El nombre del huésped es obligatorio.';
+    }
+    if ($form['fecha_inicio'] === '') {
+        $errors['fecha_inicio'] = 'La fecha de check-in es obligatoria.';
+    }
+    if ($form['fecha_fin'] === '') {
+        $errors['fecha_fin'] = 'La fecha de check-out es obligatoria.';
+    }
+    if ($form['fecha_inicio'] !== '' && $form['fecha_fin'] !== '') {
+        if ($form['fecha_inicio'] > $form['fecha_fin']) {
+            $errors['fecha_fin'] = 'La fecha de check-out debe ser posterior al check-in.';
+        }
+    }
+    if ($form['valor'] === '') {
+        $errors['valor'] = 'El valor de la reserva es obligatorio.';
+    } elseif (!is_numeric($form['valor']) || (float) $form['valor'] <= 0) {
+        $errors['valor'] = 'El valor debe ser un número mayor a 0.';
+    }
+    if ($form['hora_checkin'] === '') {
+        $errors['hora_checkin'] = 'La hora de check-in es obligatoria.';
+    }
+    if ($form['hora_checkout'] === '') {
+        $errors['hora_checkout'] = 'La hora de check-out es obligatoria.';
+    }
+    if ($form['empleado_atiende'] === '') {
+        $errors['empleado_atiende'] = 'El empleado que atiende es obligatorio.';
+    }
+    if ($form['empleado_despide'] === '') {
+        $errors['empleado_despide'] = 'El empleado que despide es obligatorio.';
+    }
+    if ($form['estado'] === '') {
+        $errors['estado'] = 'El estado es obligatorio.';
+    }
+
+    return $errors;
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function buildCreateReservaViewData(): array
+{
+    return [
+        'pageTitle' => 'Nueva Reserva',
+        'message' => Flash::message(),
+        'success' => Flash::success(),
+        'errors' => Flash::errors(),
+        'old' => Flash::old(),
+    ];
+}
+
+/**
+ * @param ReservaResponse $reserva
+ * @return array<string, mixed>
+ */
+function buildEditReservaViewData(ReservaResponse $reserva): array
+{
+    return [
+        'pageTitle' => 'Editar Reserva',
+        'reserva' => $reserva,
+        'estadoOptions' => EstadoReservaEnum::values(),
+        'message' => Flash::message(),
+        'errors' => Flash::errors(),
+        'old' => Flash::old(),
+    ];
+}
+
+/**
+ * @param ReservaResponse[] $reservas
+ * @return array<string, mixed>
+ */
+function buildListReservasViewData(array $reservas): array
+{
+    return [
+        'pageTitle' => 'Lista de Reservas',
+        'reservas' => $reservas,
+        'message' => Flash::message(),
+        'success' => Flash::success(),
+    ];
+}
+
+/**
+ * @param ReservaResponse $reserva
+ * @return array<string, mixed>
+ */
+function buildShowReservaViewData(ReservaResponse $reserva): array
+{
+    return [
+        'pageTitle' => 'Detalle de Reserva',
+        'reserva' => $reserva,
+        'message' => Flash::message(),
+    ];
+}
 $route  = isset($_GET['route']) ? trim((string) $_GET['route']) : 'home';
 $routes = WebRoutes::routes();
 
@@ -245,6 +462,201 @@ try {
             View::redirect('auth.forgot');
             break;
 
+        // ==================== RESERVAS CRUDL ====================
+
+// ---------- RESERVAS: CREATE (FORM) ----------
+        case 'reserva_create':
+            View::render('reservas/create', buildCreateReservaViewData());
+            break;
+
+// ---------- RESERVAS: STORE ----------
+        case 'reserva_store':
+            $controller = DependencyInjection::getReservaController();
+            $form = getCreateReservaFormData();
+            $form['id'] = generateUuid4();
+            $errors = validateCreateReservaForm($form);
+
+            if (!empty($errors)) {
+                Flash::setOld($form);
+                Flash::setErrors($errors);
+                Flash::setMessage('Corrige los errores del formulario.');
+                View::redirect('reservas.create');
+            }
+
+            $request = new CreateReservaWebRequest(
+                $form['id'],
+                $form['fecha'],
+                $form['hotel'],
+                $form['huesped'],
+                $form['fecha_inicio'],
+                $form['fecha_fin'],
+                $form['valor'],
+                $form['habitacion'],
+                $form['num_acompanantes'],
+                $form['pais'],
+                $form['departamento'],
+                $form['ciudad'],
+                $form['hora_checkin'],
+                $form['hora_checkout'],
+                $form['empleado_atiende'],
+                $form['empleado_despide'],
+                $form['descripcion'] !== '' ? $form['descripcion'] : null
+            );
+
+            $controller->store($request);
+            Flash::setSuccess('Reserva creada correctamente.');
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: INDEX ----------
+        case 'reserva_index':
+            $controller = DependencyInjection::getReservaController();
+            $reservas = $controller->index();
+            View::render('reservas/list', buildListReservasViewData($reservas));
+            break;
+
+// ---------- RESERVAS: SHOW ----------
+        case 'reserva_show':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+                View::redirect('reservas.index');
+            }
+
+            $reserva = $controller->show($id);
+            View::render('reservas/show', buildShowReservaViewData($reserva));
+            break;
+
+// ---------- RESERVAS: EDIT ----------
+        case 'reserva_edit':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+                View::redirect('reservas.index');
+            }
+
+            $reserva = $controller->show($id);
+            View::render('reservas/edit', buildEditReservaViewData($reserva));
+            break;
+
+// ---------- RESERVAS: UPDATE ----------
+        case 'reserva_update':
+            $controller = DependencyInjection::getReservaController();
+            $form = getUpdateReservaFormData();
+            $errors = validateUpdateReservaForm($form);
+
+            if (!empty($errors)) {
+                Flash::setOld($form);
+                Flash::setErrors($errors);
+                Flash::setMessage('Corrige los errores del formulario.');
+                header('Location: ?route=reservas.edit&id=' . urlencode($form['id']));
+                exit;
+            }
+
+            $request = new UpdateReservaWebRequest(
+                $form['id'],
+                $form['fecha'],
+                $form['hotel'],
+                $form['huesped'],
+                $form['fecha_inicio'],
+                $form['fecha_fin'],
+                $form['valor'],
+                $form['habitacion'],
+                $form['num_acompanantes'],
+                $form['pais'],
+                $form['departamento'],
+                $form['ciudad'],
+                $form['hora_checkin'],
+                $form['hora_checkout'],
+                $form['empleado_atiende'],
+                $form['empleado_despide'],
+                $form['descripcion'] !== '' ? $form['descripcion'] : null,
+                $form['estado']
+            );
+
+            $controller->update($request);
+            Flash::setSuccess('Reserva actualizada correctamente.');
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: DELETE ----------
+        case 'reserva_delete':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+            } else {
+                $controller->delete($id);
+                Flash::setSuccess('Reserva eliminada correctamente.');
+            }
+
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: CONFIRMAR ----------
+        case 'reserva_confirmar':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+            } else {
+                $controller->changeEstado($id, 'CONFIRMADA');
+                Flash::setSuccess('Reserva confirmada correctamente.');
+            }
+
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: CHECKIN ----------
+        case 'reserva_checkin':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+            } else {
+                $controller->changeEstado($id, 'CHECKIN');
+                Flash::setSuccess('Check-in realizado correctamente.');
+            }
+
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: CHECKOUT ----------
+        case 'reserva_checkout':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+            } else {
+                $controller->changeEstado($id, 'CHECKOUT');
+                Flash::setSuccess('Check-out realizado correctamente.');
+            }
+
+            View::redirect('reservas.index');
+            break;
+
+// ---------- RESERVAS: CANCELAR ----------
+        case 'reserva_cancelar':
+            $controller = DependencyInjection::getReservaController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+
+            if ($id === '') {
+                Flash::setMessage('ID de reserva no proporcionado.');
+            } else {
+                $controller->changeEstado($id, 'CANCELADA');
+                Flash::setSuccess('Reserva cancelada correctamente.');
+            }
+
+            View::redirect('reservas.index');
+            break;
         default:
             throw new \RuntimeException('Accion no soportada.');
     }
@@ -275,6 +687,30 @@ try {
             break;
         case 'users.delete':
             View::redirect('users.index');
+            break;
+
+        case 'reservas.store':
+            Flash::setOld(getCreateReservaFormData());
+            View::redirect('reservas.create');
+            break;
+
+        case 'reservas.update':
+            $updateId = trim((string) ($_POST['id'] ?? ''));
+            Flash::setOld(getUpdateReservaFormData());
+            header('Location: ?route=reservas.edit&id=' . urlencode($updateId));
+            exit;
+
+        case 'reservas.confirmar':
+        case 'reservas.checkin':
+        case 'reservas.checkout':
+        case 'reservas.cancelar':
+            Flash::setMessage($msg);
+            View::redirect('reservas.index');
+            break;
+
+        case 'reservas.show':
+        case 'reservas.edit':
+            View::redirect('reservas.index');
             break;
         default:
             View::render('home', buildHomeViewData($msg));
