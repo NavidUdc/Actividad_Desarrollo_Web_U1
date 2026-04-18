@@ -84,25 +84,35 @@ declare(strict_types=1); ?>
     }
 </style>
 <nav>
-    <a class="nav-brand" href="?route=home"> CRUDL</a>
+    <a class="nav-brand" href="?route=home"> CRUDL Hexagonal</a>
 
     <?php if ($authUser): ?>
+        <!-- ==================== GRUPO USUARIOS ==================== -->
         <div class="nav-group">
-            <span class="nav-group-label">Usuarios</span>
-            <a class="nav-link <?= str_starts_with($currentRoute, 'users') ? 'active' : '' ?>"
-                href="?route=users.index">Listar</a>
+            <span class="nav-group-label"> Usuarios</span>
+            <a class="nav-link <?= str_starts_with($currentRoute, 'users') && $currentRoute !== 'users.create' ? 'active' : '' ?>"
+               href="?route=users.index">Listar</a>
             <a class="nav-link <?= $currentRoute === 'users.create' ? 'active' : '' ?>"
-                href="?route=users.create">Registrar</a>
+               href="?route=users.create">Registrar</a>
+        </div>
+
+        <!-- ==================== GRUPO RESERVAS ==================== -->
+        <div class="nav-group">
+            <span class="nav-group-label"> Reservas</span>
+            <a class="nav-link <?= str_starts_with($currentRoute, 'reservas') && $currentRoute !== 'reservas.create' ? 'active' : '' ?>"
+               href="?route=reservas.index">Listar</a>
+            <a class="nav-link <?= $currentRoute === 'reservas.create' ? 'active' : '' ?>"
+               href="?route=reservas.create">Nueva</a>
         </div>
 
         <div class="nav-user">
-            <span> <?= htmlspecialchars($authUser['name'], ENT_QUOTES, 'UTF-8') ?></span>
+            <span><?= htmlspecialchars($authUser['name'], ENT_QUOTES, 'UTF-8') ?></span>
             <span style="color:#ccc">|</span>
             <a class="nav-logout" href="?route=auth.logout"> Salir</a>
         </div>
     <?php else: ?>
-        <a class="nav-link" href="?route=auth.login">Iniciar sesion</a>
-        <a class="nav-link" href="?route=auth.forgot">Recuperar contraseña</a>
+        <a class="nav-link" href="?route=auth.login"> Iniciar sesión</a>
+        <a class="nav-link" href="?route=auth.forgot"> Recuperar contraseña</a>
     <?php endif; ?>
 </nav>
 <hr style="margin: 0 0 16px 0;">
